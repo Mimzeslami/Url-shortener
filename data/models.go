@@ -28,7 +28,6 @@ type Models struct {
 	Url Url
 }
 
-// User is the structure which holds one user from the database.
 type Url struct {
 	gorm.Model
 	ShortUrl string `gorm:"unique;not null"`
