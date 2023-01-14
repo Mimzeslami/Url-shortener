@@ -9,6 +9,7 @@ import (
 	"time"
 	"url/data"
 
+	"github.com/go-redis/redis"
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -19,8 +20,9 @@ const webPort = "80"
 var counts int64
 
 type Config struct {
-	DB     *sql.DB
-	Models data.Models
+	DB          *sql.DB
+	RedisClient *redis.Client
+	Models      data.Models
 }
 
 func main() {
@@ -32,10 +34,18 @@ func main() {
 		log.Panic("Can't connect to Postgres!")
 	}
 
+	redisClient := connectToRedis()
+
+	if redisClient == nil {
+		log.Panic("Can't connect to Redis!")
+
+	}
+
 	// set up config
 	app := Config{
-		DB:     conn,
-		Models: data.New(conn),
+		DB:          conn,
+		RedisClient: redisClient,
+		Models:      data.New(conn),
 	}
 
 	srv := &http.Server{
@@ -85,4 +95,23 @@ func connectToDB() *sql.DB {
 		time.Sleep(2 * time.Second)
 		continue
 	}
+}
+
+func connectToRedis() *redis.Client {
+	fmt.Println("Connecting to Redis")
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+	pong, err := client.Ping().Result()
+	log.Println(pong, err)
+	if err != nil {
+		return nil
+	}
+
+	log.Println("Connected To Redis!")
+
+	return client
 }
