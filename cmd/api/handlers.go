@@ -36,11 +36,9 @@ func (app *Config) GenerateHashAndInsert(longUrl string, startIndex int) string 
 	dbURLData, err := app.Models.Url.GetByShortUrl(shortUrl)
 
 	if err != nil {
-		fmt.Println(dbURLData, "in not found")
 		go app.StoreTinyURL(longUrl, shortUrl)
 		return shortUrl
 	} else if (dbURLData.ShortUrl == shortUrl) && (dbURLData.LongUrl == longUrl) {
-		fmt.Println(dbURLData, "in found and equal")
 		return shortUrl
 	} else {
 		return app.GenerateHashAndInsert(longUrl, startIndex+1)
