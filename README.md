@@ -18,7 +18,6 @@ To deploy this project run
 ## Features
 
 - Dockerize
-- Hexagonal architecture
 - Cross platform
 
 
