@@ -9,14 +9,20 @@ import (
 	"regexp"
 )
 
-func (app *Config) SaveShortURL(longUrl string, shortURL string) {
+func (app *Config) SaveShortURL(longUrl string, shortURL string) error {
 	d := app.Models.Url
 	d.LongUrl = longUrl
 	d.ShortUrl = shortURL
-	app.Models.Url.Insert(d)
-	app.RedisClient.HSet("urls", shortURL, longUrl)
+	_, err := app.Models.Url.Insert(d)
+	if err != nil {
+		return err
+	}
+	_, err = app.RedisClient.HSet("urls", shortURL, longUrl).Result()
+	if err != nil {
+		return err
+	}
+	return nil
 }
-
 func (app *Config) GenerateHashAndInsert(longUrl string, startIndex int) string {
 
 	byteURLData := []byte(longUrl)
