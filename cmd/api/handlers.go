@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func (app *Config) StoreTinyURL(longUrl string, shortURL string) {
+func (app *Config) SaveShortURL(longUrl string, shortURL string) {
 	d := app.Models.Url
 	d.LongUrl = longUrl
 	d.ShortUrl = shortURL
@@ -36,7 +36,7 @@ func (app *Config) GenerateHashAndInsert(longUrl string, startIndex int) string 
 	dbURLData, err := app.Models.Url.GetByShortUrl(shortUrl)
 
 	if err != nil {
-		go app.StoreTinyURL(longUrl, shortUrl)
+		go app.SaveShortURL(longUrl, shortUrl)
 		return shortUrl
 	} else if (dbURLData.ShortUrl == shortUrl) && (dbURLData.LongUrl == longUrl) {
 		return shortUrl
@@ -45,7 +45,7 @@ func (app *Config) GenerateHashAndInsert(longUrl string, startIndex int) string 
 	}
 }
 
-func (app *Config) GetTinyHandler(res http.ResponseWriter, req *http.Request) {
+func (app *Config) GetShortHandler(res http.ResponseWriter, req *http.Request) {
 	requestParams, err := req.URL.Query()["longUrl"]
 	if !err || len(requestParams[0]) < 1 {
 		app.errorJSON(res, errors.New("URL parameter longUrl is missing"), http.StatusBadRequest)
